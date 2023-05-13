@@ -119,7 +119,7 @@
                         <id>default-cli</id>
                         <configuration>
                             <mainClass>
-                                com.company.administracion_negocio/com.company.administracion_negocio.HelloApplication
+                                com.company.administracion_negocio/com.company.administracion_negocio.Principal
                             </mainClass>
                             <launcher>app</launcher>
                             <jlinkZipName>app</jlinkZipName>
