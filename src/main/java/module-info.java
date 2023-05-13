@@ -10,4 +10,5 @@ module com.company.administracion_negocio {
 
     opens com.company.administracion_negocio to javafx.fxml;
     exports com.company.administracion_negocio;
+
 }
