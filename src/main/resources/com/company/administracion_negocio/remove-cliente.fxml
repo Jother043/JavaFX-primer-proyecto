@@ -3,11 +3,11 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<AnchorPane prefHeight="663.0" prefWidth="1312.0" xmlns="http://javafx.com/javafx/17.0.2-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.company.administracion_negocio.Controllers.ClienteController">
+<AnchorPane prefHeight="667.0" prefWidth="1318.0" xmlns="http://javafx.com/javafx/17.0.2-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.company.administracion_negocio.Controllers.ClienteController">
     <TextField fx:id="nombreCliente" layoutX="97.0" layoutY="34.0" prefHeight="26.0" prefWidth="400.0" />
     <Label layoutX="32.0" layoutY="38.0" text="Nombre" />
     <Button fx:id="BtnRemove" layoutX="510.0" layoutY="34.0" mnemonicParsing="false" onAction="#RemoveCliente" text="Eliminar" />
-    <Button fx:id="BtnUpdate" layoutX="1230.0" layoutY="627.0" mnemonicParsing="false" onAction="#updateCliente" text="Actualizar" />
+    <Button fx:id="BtnUpdate" layoutX="1229.0" layoutY="628.0" mnemonicParsing="false" onAction="#updateCliente" text="Actualizar" />
     <TableView fx:id="table" layoutX="28.0" layoutY="133.0" prefHeight="480.0" prefWidth="1269.0">
         <columns>
             <TableColumn fx:id="customerNumber" prefWidth="107.20000267028809" text="customerNumber" />
@@ -25,5 +25,6 @@
             <TableColumn fx:id="contactFirstName" prefWidth="130.0" text="contactFirstName" />
         </columns>
     </TableView>
+   <Button layoutX="1250.0" layoutY="35.0" mnemonicParsing="false" text="SALIR" />
 
 </AnchorPane>

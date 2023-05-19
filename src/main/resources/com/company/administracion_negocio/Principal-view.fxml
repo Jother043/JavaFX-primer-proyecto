@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<AnchorPane prefHeight="331.0" prefWidth="477.0" xmlns="http://javafx.com/javafx/17.0.2-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.company.administracion_negocio.Controllers.PrincipalController">
+    <padding>
+        <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+    </padding>
+
+    <Button fx:id="btnRemoveClient" layoutX="14.0" layoutY="26.0" onAction="#viewProduct" prefHeight="101.0" prefWidth="137.0" text="Eliminar clientes" />
+    <Button layoutX="447.0" layoutY="260.0" onAction="#onByeButtonClick" text="Salir" />
+   <Button layoutX="185.0" layoutY="25.0" mnemonicParsing="false" prefHeight="102.0" prefWidth="138.0" text="Añadir cliente" />
+   <Button layoutX="349.0" layoutY="25.0" mnemonicParsing="false" prefHeight="102.0" prefWidth="138.0" text="Añadir producto" />
+</AnchorPane>

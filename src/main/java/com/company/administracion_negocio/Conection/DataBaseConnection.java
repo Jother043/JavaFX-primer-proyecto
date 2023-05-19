@@ -12,19 +12,23 @@ public class DataBaseConnection implements Closeable {
     private String password = "admin.123";
     private Connection conexion;
 
+    //Constructor privado para que no se pueda instanciar desde fuera
     private DataBaseConnection() throws SQLException {
 
         conexion = DriverManager.getConnection(url, usuario, password);
 
     }
 
+    //Método público que devuelve la instancia única
     public static DataBaseConnection getInstance() throws SQLException {
+        //Si no existe la instancia única la creamos
         if (instance == null) {
             instance = new DataBaseConnection();
         }
         return instance;
     }
 
+    //Método para cerrar la conexión.
     public void close() {
         try {
             if(conexion != null) {
@@ -35,6 +39,7 @@ public class DataBaseConnection implements Closeable {
         }
     }
 
+    //Método para obtener la conexión
     public Connection getConexion() {
         return conexion;
     }

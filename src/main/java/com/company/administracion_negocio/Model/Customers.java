@@ -1,7 +1,10 @@
 package com.company.administracion_negocio.Model;
 
 import com.company.administracion_negocio.Conection.DataBaseConnection;
-import javafx.scene.control.TableView;
+import com.company.administracion_negocio.Principal;
+import javafx.beans.property.SimpleIntegerProperty;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.scene.control.Alert;
 import javafx.scene.layout.VBox;
 
 import java.sql.PreparedStatement;
@@ -12,7 +15,7 @@ import java.util.ArrayList;
 
 public class Customers {
 
-    private String customerNumber;
+    private int customerNumber;
     private String customerName;
     private String contactLastName;
     private String contactFirstName;
@@ -21,32 +24,40 @@ public class Customers {
     private String addressLine2;
     private String city;
     private String state;
-    private int postalCode;
+    private String postalCode;
     private String country;
     private int salesRepEmployeeNumber;
     private double creditLimit;
 
-    public Customers() {
-        this.customerNumber = customerNumber;
-        this.customerName = customerName;
-        this.contactLastName = contactLastName;
-        this.contactFirstName = contactFirstName;
-        this.phone = phone;
-        this.addressLine1 = addressLine1;
-        this.addressLine2 = addressLine2;
-        this.city = city;
-        this.state = state;
-        this.postalCode = postalCode;
-        this.country = country;
-        this.salesRepEmployeeNumber = salesRepEmployeeNumber;
-        this.creditLimit = creditLimit;
+    //Constructor
+    public Customers(int customerNumber, String customerName, String contactLastName, String contactFirstName, String phone, String addressLine1, String addressLine2, String city, String state, String postalCode, String country, int salesRepEmployeeNumber, double creditLimit) {
+
+        this.customerNumber = new SimpleIntegerProperty(customerNumber).get();
+        this.customerName = new SimpleStringProperty(customerName).get();
+        this.contactLastName = new SimpleStringProperty(contactLastName).get();
+        this.contactFirstName = new SimpleStringProperty(contactFirstName).get();
+        this.phone = new SimpleStringProperty(phone).get();
+        this.addressLine1 = new SimpleStringProperty(addressLine1).get();
+        this.addressLine2 = new SimpleStringProperty(addressLine2).get();
+        this.city = new SimpleStringProperty(city).get();
+        this.state = new SimpleStringProperty(state).get();
+        this.postalCode = new SimpleStringProperty(postalCode).get();
+        this.country = new SimpleStringProperty(country).get();
+        this.salesRepEmployeeNumber = new SimpleIntegerProperty(salesRepEmployeeNumber).get();
+        this.creditLimit = new SimpleIntegerProperty((int) creditLimit).get();
+
     }
 
-    public String getCustomerNumber() {
+    //Constructor sin parámetros para poder instanciar la clase y poder usar sus métodos.
+    public Customers() {
+
+    }
+
+    public int getCustomerNumber() {
         return customerNumber;
     }
 
-    public void setCustomerNumber(String customerNumber) {
+    public void setCustomerNumber(int customerNumber) {
         this.customerNumber = customerNumber;
     }
 
@@ -114,11 +125,11 @@ public class Customers {
         this.state = state;
     }
 
-    public int getPostalCode() {
+    public String getPostalCode() {
         return postalCode;
     }
 
-    public void setPostalCode(int postalCode) {
+    public void setPostalCode(String postalCode) {
         this.postalCode = postalCode;
     }
 
@@ -146,66 +157,145 @@ public class Customers {
         this.creditLimit = creditLimit;
     }
 
+    Principal principal = new Principal();
+
     /**
-     * Metodo para insertar un cliente en la base de datos
+     * Método encargado de obtener los datos de todos los clientes para mostrarlos en la tabla de clientes
+     * de la vista de clientes.
+     *
+     * @return ArrayList<Customers>
      */
-    public TableView<Customers> seleccionarClienteBd(String customerNumber) {
-        //Validar que se haya seleccionado un cliente
-        if (customerNumber == null || customerNumber.isEmpty()) {
-            VBox vbox = new VBox();
-            vbox.getChildren().add(new javafx.scene.control.Label("No se ha seleccionado un cliente"));
-            return null;
-        }
+    public ArrayList<Customers> seleccionarClienteBd() {
+
         //Crear lista de clientes
         ArrayList<Customers> listaClientes = new ArrayList<>();
         //Conectar a base de datos
-        try (DataBaseConnection conexion = DataBaseConnection.getInstance()) {
-
+        DataBaseConnection conexion;
+        try {
+            conexion = DataBaseConnection.getInstance();
             //Preparar consulta
-            String clienteSelect = "SELECT customerNumber FROM customers WHERE customerName = ?";
-            PreparedStatement sentencia = conexion.getConexion().prepareStatement(clienteSelect);
-            sentencia.setString(1, customerNumber);
-            ResultSet resultado = sentencia.executeQuery();
-            //Validar que exista el cliente
+            String clienteSelect = "SELECT * FROM customers";
+            //Ejecutar consulta y guardar resultado en variable resultado de tipo ResultSet.
+            Statement sentencia = conexion.getConexion().createStatement();
+            ResultSet resultado = sentencia.executeQuery(clienteSelect);
+
+            //Si no hay resultado mostrar mensaje de error
             if (!resultado.next()) {
                 //Mostrar mensaje de error
                 VBox vbox = new VBox();
                 //Creamos un label para mostrar el mensaje de error.
                 vbox.getChildren().add(new javafx.scene.control.Label("No existe el cliente seleccionado"));
-                conexion.getConexion().rollback();
+
                 return null;
             }
-            //Recorrer resultado
+
+            //Si hay resultado, recorrer resultado y guardar cada cliente en la lista de clientes.
             while (resultado.next()) {
-                Customers cliente = new Customers();
-                cliente.setCustomerName(resultado.getString("customerNumber"));
-                listaClientes.add(cliente);
+
+                customerNumber = resultado.getInt("customerNumber");
+                customerName = resultado.getString("customerName");
+                contactLastName = resultado.getString("contactLastName");
+                contactFirstName = resultado.getString("contactFirstName");
+                phone = resultado.getString("phone");
+                addressLine1 = resultado.getString("addressLine1");
+                addressLine2 = resultado.getString("addressLine2");
+                city = resultado.getString("city");
+                state = resultado.getString("state");
+                postalCode = resultado.getString("postalCode");
+                country = resultado.getString("country");
+                salesRepEmployeeNumber = resultado.getInt("salesRepEmployeeNumber");
+                creditLimit = resultado.getDouble("creditLimit");
+                //Crear objeto de tipo Customers con los datos obtenidos de la base de datos.
+                Customers customers = new Customers(customerNumber, customerName, contactLastName, contactFirstName, phone, addressLine1, addressLine2, city, state, postalCode, country, salesRepEmployeeNumber, creditLimit);
+                //Añadir objeto a la lista de clientes.
+                listaClientes.add(customers);
+
             }
 
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            principal.errorObtenerClientes("Error al obtener los clientes", "No se han podido obtener los clientes de la base de datos");
         }
-        //TODO: Mostrar clientes en la tabla
-        listaClientes.forEach(cliente -> System.out.println(cliente.getCustomerName()));
-        return null;
+
+        return listaClientes;
     }
 
     /**
-     * Método para eliminar un cliente de la base de datos
-     * @param listaClientes
+     * Método encargado de obtener los datos de un cliente en específico para mostrarlos en la vista de clientes.
+     *
+     * @param customerName
+     * @return int
+     */
+    public int getNumber(String customerName) {
+
+        System.out.println("CustomerName: " + customerName);
+
+        if (customerName.trim().isEmpty()) {
+            //Llamar al método errorObtenerClientes de la clase principal para mostrar el mensaje de error.
+            principal.errorObtenerClientes("Error al obtener el número de cliente", "No se ha seleccionado ningún cliente");
+        }
+
+        DataBaseConnection conexion;
+        try {
+
+            conexion = DataBaseConnection.getInstance();
+            String query = "SELECT customerNumber FROM customers where customerName = ?";
+            PreparedStatement statement = conexion.getConexion().prepareStatement(query);
+            ResultSet resultSet = statement.executeQuery(query);
+
+            //Validar que exista el cliente
+            if (!resultSet.next()) {
+                principal.errorObtenerClientes("Error al obtener el número de cliente", "No existe el cliente seleccionado");
+            }
+
+            int customerNumber = 0;
+
+            //Obtener el número de cliente si existe el cliente seleccionado en la base de datos. ç
+            if (resultSet.next()) {
+                customerNumber = resultSet.getInt(1);
+            }
+
+
+        } catch (SQLException e) {
+            //Llamar al método errorObtenerClientes de la clase principal para mostrar el mensaje de error.
+            principal.errorObtenerClientes("Error al obtener el número de cliente", "Error al conectar con la base de datos: " + e.getMessage());
+        }
+        return customerNumber;
+    }
+
+    /**
+     * Método para eliminar un cliente de la base de datos.
+     *
      * @throws SQLException
      */
-    public void removeCustomer(ArrayList<Customers> listaClientes) {
-        try (DataBaseConnection conexion = DataBaseConnection.getInstance()) {
-            for (Customers cliente : listaClientes) {
-                int customerNumber = Integer.parseInt(cliente.getCustomerNumber());
-                String clienteDelete = "DELETE FROM customers WHERE customerNumber =" + customerNumber;
-                //TODO: Mostrar mensaje de confirmación
+    public void removeCustomer(String customerNumber) {
 
+        try (DataBaseConnection conexion = DataBaseConnection.getInstance();
+             Statement statement = conexion.getConexion().createStatement()) {
+
+            conexion.getConexion().setAutoCommit(false);
+            String query = "DELETE FROM payments WHERE customerNumber = " + customerNumber;
+            statement.executeUpdate(query);
+            ResultSet orderResult = statement.executeQuery("SELECT orderNumber FROM orders WHERE customerNumber = " + customerNumber);
+
+            if (!orderResult.next()) {
+                System.out.println("No hay pedidos para este cliente");
             }
+
+            while (orderResult.next()) {
+                String orderNumber = orderResult.getString("orderNumber");
+                statement.executeUpdate("DELETE FROM orderdetails WHERE orderNumber = " + orderNumber);
+            }
+
+            //Borramos los pedidos del cliente:
+            statement.executeUpdate("DELETE FROM orders WHERE customerNumber = " + customerNumber);
+
+            //Botramos el cliente:
+            statement.executeUpdate("DELETE FROM customers WHERE customerNumber = " + customerNumber);
+
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
+
     }
 
 }
