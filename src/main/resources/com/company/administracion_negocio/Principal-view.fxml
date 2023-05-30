@@ -11,6 +11,6 @@
 
     <Button fx:id="btnRemoveClient" layoutX="14.0" layoutY="26.0" onAction="#viewProduct" prefHeight="101.0" prefWidth="137.0" text="Eliminar clientes" />
     <Button layoutX="447.0" layoutY="260.0" onAction="#onByeButtonClick" text="Salir" />
-   <Button layoutX="185.0" layoutY="25.0" mnemonicParsing="false" prefHeight="102.0" prefWidth="138.0" text="Añadir cliente" />
+   <Button layoutX="185.0" layoutY="25.0" mnemonicParsing="false" onAction="#openViewAddCustomer" prefHeight="102.0" prefWidth="138.0" text="Añadir cliente" />
    <Button layoutX="349.0" layoutY="25.0" mnemonicParsing="false" prefHeight="102.0" prefWidth="138.0" text="Añadir producto" />
 </AnchorPane>

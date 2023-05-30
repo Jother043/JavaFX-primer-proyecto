@@ -1,0 +1,5 @@
+module:com.company.administracion_negocio
+com.company.administracion_negocio
+com.company.administracion_negocio.Conection
+com.company.administracion_negocio.Controllers
+com.company.administracion_negocio.Model

@@ -4,14 +4,11 @@ import com.company.administracion_negocio.Conection.DataBaseConnection;
 import com.company.administracion_negocio.Principal;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
-import javafx.scene.control.Alert;
 import javafx.scene.layout.VBox;
 
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 import java.util.ArrayList;
+import java.util.List;
 
 public class Customers {
 
@@ -160,6 +157,18 @@ public class Customers {
     Principal principal = new Principal();
 
     /**
+     * Método encargado de conectar a la base de datos.
+     *
+     * @return Connection
+     * @throws SQLException
+     */
+    public Connection conecctionDataBase() throws SQLException {
+        DataBaseConnection conexion;
+        conexion = DataBaseConnection.getInstance();
+        return conexion.getConexion();
+    }
+
+    /**
      * Método encargado de obtener los datos de todos los clientes para mostrarlos en la tabla de clientes
      * de la vista de clientes.
      *
@@ -170,13 +179,15 @@ public class Customers {
         //Crear lista de clientes
         ArrayList<Customers> listaClientes = new ArrayList<>();
         //Conectar a base de datos
-        DataBaseConnection conexion;
+        Connection conexion;
         try {
-            conexion = DataBaseConnection.getInstance();
+            conexion = conecctionDataBase();
+
+            DataBaseConnection.getInstance();
             //Preparar consulta
             String clienteSelect = "SELECT * FROM customers";
             //Ejecutar consulta y guardar resultado en variable resultado de tipo ResultSet.
-            Statement sentencia = conexion.getConexion().createStatement();
+            Statement sentencia = conexion.createStatement();
             ResultSet resultado = sentencia.executeQuery(clienteSelect);
 
             //Si no hay resultado mostrar mensaje de error
@@ -212,9 +223,13 @@ public class Customers {
 
             }
 
+
         } catch (SQLException e) {
+
             principal.errorObtenerClientes("Error al obtener los clientes", "No se han podido obtener los clientes de la base de datos");
+            throw new RuntimeException(e);
         }
+
 
         return listaClientes;
     }
@@ -226,76 +241,205 @@ public class Customers {
      * @return int
      */
     public int getNumber(String customerName) {
-
+        int customerNumber = 0;
         System.out.println("CustomerName: " + customerName);
 
-        if (customerName.trim().isEmpty()) {
+        try {
+            Connection conexion = conecctionDataBase();
+        } catch (SQLException e) {
             //Llamar al método errorObtenerClientes de la clase principal para mostrar el mensaje de error.
-            principal.errorObtenerClientes("Error al obtener el número de cliente", "No se ha seleccionado ningún cliente");
+            principal.errorObtenerClientes("Error al obtener el número de cliente", "Error al conectar con la base de datos: " + e.getMessage());
         }
 
-        DataBaseConnection conexion;
-        try {
+        try (PreparedStatement consultaNumeroCliente = conecctionDataBase().prepareStatement("SELECT customerNumber FROM customers where customerName = ?")) {
 
-            conexion = DataBaseConnection.getInstance();
-            String query = "SELECT customerNumber FROM customers where customerName = ?";
-            PreparedStatement statement = conexion.getConexion().prepareStatement(query);
-            ResultSet resultSet = statement.executeQuery(query);
+            consultaNumeroCliente.setString(1, customerName);
+            ResultSet resultSet = consultaNumeroCliente.executeQuery();
 
-            //Validar que exista el cliente
             if (!resultSet.next()) {
                 principal.errorObtenerClientes("Error al obtener el número de cliente", "No existe el cliente seleccionado");
             }
 
-            int customerNumber = 0;
-
-            //Obtener el número de cliente si existe el cliente seleccionado en la base de datos. ç
-            if (resultSet.next()) {
-                customerNumber = resultSet.getInt(1);
-            }
+            customerNumber = resultSet.getInt(1);
 
 
         } catch (SQLException e) {
-            //Llamar al método errorObtenerClientes de la clase principal para mostrar el mensaje de error.
-            principal.errorObtenerClientes("Error al obtener el número de cliente", "Error al conectar con la base de datos: " + e.getMessage());
+            //Si el mensaje de error contiene "empty result set" mostrar mensaje de error de cliente no encontrado.
+            if (e.getMessage().contains("empty result set")) {
+                System.err.println("No existe el cliente seleccionado");
+            } else if (e.getMessage().contains("No operations allowed after connection closed.")) {
+                principal.errorObtenerClientes("Error al obtener el número de cliente", "Error al conectar con la base de datos por cierre de conexión");
+            } else {
+                principal.errorObtenerClientes("Error al obtener el número de cliente", "Error al conectar con la base de datos: " + e.getMessage());
+                throw new RuntimeException(e);
+            }
+
         }
         return customerNumber;
     }
 
     /**
      * Método para eliminar un cliente de la base de datos.
+     * Elimina los pagos relacionados con el cliente, las órdenes relacionadas con el cliente y finalmente el cliente.
+     * Lo hacemos asi para evitar problemas de integridad referencial.
      *
-     * @throws SQLException
+     * @param customerNumber
      */
     public void removeCustomer(String customerNumber) {
+        if (customerNumber.trim().isEmpty()) {
+            principal.errorObtenerClientes("No se ha podido eliminar el cliente", "El cliente no existe");
+        }
+        Principal principal = new Principal();
+        try {
 
-        try (DataBaseConnection conexion = DataBaseConnection.getInstance();
-             Statement statement = conexion.getConexion().createStatement()) {
+            conecctionDataBase().setAutoCommit(false);
 
-            conexion.getConexion().setAutoCommit(false);
-            String query = "DELETE FROM payments WHERE customerNumber = " + customerNumber;
-            statement.executeUpdate(query);
-            ResultSet orderResult = statement.executeQuery("SELECT orderNumber FROM orders WHERE customerNumber = " + customerNumber);
+            // Eliminar pagos relacionados con el cliente
+            String deletePaymentsQuery = "DELETE FROM payments WHERE customerNumber = ?";
+            PreparedStatement deletePaymentsStatement = conecctionDataBase().prepareStatement(deletePaymentsQuery);
+            deletePaymentsStatement.setString(1, customerNumber);
+            deletePaymentsStatement.executeUpdate();
 
-            if (!orderResult.next()) {
-                System.out.println("No hay pedidos para este cliente");
-            }
+
+            // Obtener los números de orden relacionados con el cliente
+            String selectOrdersQuery = "SELECT orderNumber FROM orders WHERE customerNumber = ?";
+            PreparedStatement selectOrdersStatement = conecctionDataBase().prepareStatement(selectOrdersQuery);
+            selectOrdersStatement.setString(1, customerNumber);
+            ResultSet orderResult = selectOrdersStatement.executeQuery();
+
+            List<Integer> orderNumbers = new ArrayList<>();
 
             while (orderResult.next()) {
-                String orderNumber = orderResult.getString("orderNumber");
-                statement.executeUpdate("DELETE FROM orderdetails WHERE orderNumber = " + orderNumber);
+                int orderNumber = orderResult.getInt("orderNumber");
+                orderNumbers.add(orderNumber);
             }
 
-            //Borramos los pedidos del cliente:
-            statement.executeUpdate("DELETE FROM orders WHERE customerNumber = " + customerNumber);
 
-            //Botramos el cliente:
-            statement.executeUpdate("DELETE FROM customers WHERE customerNumber = " + customerNumber);
+            // Eliminar los detalles de orden relacionados con los números de orden obtenidos
+            String deleteOrderDetailsQuery = "DELETE FROM orderdetails WHERE orderNumber = ?";
+            PreparedStatement deleteOrderDetailsStatement = conecctionDataBase().prepareStatement(deleteOrderDetailsQuery);
+            for (Integer orderNumber : orderNumbers) {
+                deleteOrderDetailsStatement.setInt(1, orderNumber);
+                deleteOrderDetailsStatement.executeUpdate();
+            }
 
+
+            // Eliminar las órdenes relacionadas con el cliente
+            String deleteOrdersQuery = "DELETE FROM orders WHERE customerNumber = ?";
+            PreparedStatement deleteOrdersStatement = conecctionDataBase().prepareStatement(deleteOrdersQuery);
+            deleteOrdersStatement.setString(1, customerNumber);
+            deleteOrdersStatement.executeUpdate();
+
+
+            // Eliminar el cliente
+            String deleteCustomersQuery = "DELETE FROM customers WHERE customerNumber = ?";
+            PreparedStatement deleteCustomersStatement = conecctionDataBase().prepareStatement(deleteCustomersQuery);
+            deleteCustomersStatement.setString(1, customerNumber);
+            deleteCustomersStatement.executeUpdate();
+            // Confirmar cambios
+            conecctionDataBase().commit();
+            if (conecctionDataBase() != null) {
+                System.out.println("Conexión cerrada");
+
+                deleteCustomersStatement.close();
+                deletePaymentsStatement.close();
+                selectOrdersStatement.close();
+                selectOrdersStatement.close();
+                deleteOrderDetailsStatement.close();
+                deleteOrdersStatement.close();
+            }
         } catch (SQLException e) {
+            try {
+                conecctionDataBase().rollback();
+            } catch (SQLException ex) {
+                throw new RuntimeException(ex);
+            }
+            principal.errorObtenerClientes("Error al eliminar el cliente", "Error al conectar con la base de datos: " + e.getMessage());
             throw new RuntimeException(e);
         }
 
+    }
+
+    /**
+     * Método para obtener el último número de cliente de la base de datos.
+     * Utiliza un PreparedStatement para evitar inyección SQL.
+     * Llama al método errorObtenerClientes de la clase principal para mostrar el mensaje de error.
+     * @return int
+     */
+    public int lastCustomerNumer() {
+        int lastCustomerNumber = 0;
+    
+        try (PreparedStatement consultaNumeroCliente = conecctionDataBase().prepareStatement("SELECT MAX(customerNumber) FROM customers")) {
+
+            ResultSet resultSet = consultaNumeroCliente.executeQuery();
+
+            if (!resultSet.next()) {
+                principal.errorObtenerClientes("Error al obtener el último número de cliente", "No existe el cliente seleccionado");
+            }
+
+            lastCustomerNumber = resultSet.getInt(1);
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return lastCustomerNumber;
+    }
+
+    /**
+     * Método para insertar un cliente en la base de datos a partir de los datos introducidos en el formulario.
+     * Utiliza un PreparedStatement para evitar inyección SQL.
+     * Llama al método errorObtenerClientes de la clase principal para mostrar el mensaje de error.
+     * @param customers
+     * @param customerName
+     * @param contactLastName
+     * @param contactFirstName
+     * @param phone
+     * @param addressLine1
+     * @param addressLine2
+     * @param city
+     * @param state
+     * @param postalCode
+     * @param country
+     * @param salesRepEmployeeNumber
+     * @param creditLimit
+     * @throws SQLException
+     */
+    public void insertarCliente(Customers customers, String customerName, String contactLastName,
+                                String contactFirstName, String phone, String addressLine1, String addressLine2,
+                                String city, String state, String postalCode, String country, int salesRepEmployeeNumber,
+                                double creditLimit) {
+        try {
+            Connection conexion = conecctionDataBase();
+        } catch (SQLException e) {
+            principal.errorObtenerClientes("Error al insertar el cliente", "Error al conectar con la base de datos: " + e.getMessage());
+        }
+        //Hacemos un prepareStatement para evitar la inyección SQL
+        try (PreparedStatement insertarCliente = conecctionDataBase().prepareStatement("INSERT INTO customers VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)")) {
+                //Insertamos los datos en la base de datos
+                insertarCliente.setInt(1, lastCustomerNumer() + 1);
+                insertarCliente.setString(2, customerName);
+                insertarCliente.setString(3, contactLastName);
+                insertarCliente.setString(4, contactFirstName);
+                insertarCliente.setString(5, phone);
+                insertarCliente.setString(6, addressLine1);
+                insertarCliente.setString(7, addressLine2);
+                insertarCliente.setString(8, city);
+                insertarCliente.setString(9, state);
+                insertarCliente.setString(10, postalCode);
+                insertarCliente.setString(11, country);
+                insertarCliente.setInt(12, salesRepEmployeeNumber);
+                insertarCliente.setDouble(13, creditLimit);
+                //Ejecutamos la consulta
+                insertarCliente.executeUpdate();
+                //Creamos un objeto de la clase principal para poder llamar al método alertaBorrarCliente
+                Principal principal = new Principal();
+                //Llamamos al método alertaBorrarCliente para mostrar un mensaje de confirmación
+                principal.alertaBorrarCliente("Cliente insertado correctamente", "El cliente se ha insertado correctamente");
+
+
+        } catch (SQLException e) {
+            principal.errorObtenerClientes("Error al insertar el cliente", "Error al conectar con la base de datos: " + e.getMessage());
+            throw new RuntimeException(e);
+        }
     }
 
 }

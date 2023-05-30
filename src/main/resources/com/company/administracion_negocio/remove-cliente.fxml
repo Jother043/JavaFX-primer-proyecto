@@ -3,15 +3,16 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<AnchorPane prefHeight="667.0" prefWidth="1318.0" xmlns="http://javafx.com/javafx/17.0.2-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.company.administracion_negocio.Controllers.ClienteController">
-    <TextField fx:id="nombreCliente" layoutX="97.0" layoutY="34.0" prefHeight="26.0" prefWidth="400.0" />
+<AnchorPane prefHeight="667.0" prefWidth="1318.0" xmlns="http://javafx.com/javafx/17.0.2-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.company.administracion_negocio.Controllers.RemoveClienteController">
+    <TextField fx:id="nombreCliente" layoutX="97.0" layoutY="34.0" onKeyPressed="#onPressIntro" prefHeight="26.0" prefWidth="400.0" />
     <Label layoutX="32.0" layoutY="38.0" text="Nombre" />
-    <Button fx:id="BtnRemove" layoutX="510.0" layoutY="34.0" mnemonicParsing="false" onAction="#RemoveCliente" text="Eliminar" />
+    <Button fx:id="BtnRemove" layoutX="510.0" layoutY="34.0" mnemonicParsing="false" onAction="#RemoveClienteTabla" text="Eliminar" />
     <Button fx:id="BtnUpdate" layoutX="1229.0" layoutY="628.0" mnemonicParsing="false" onAction="#updateCliente" text="Actualizar" />
     <TableView fx:id="table" layoutX="28.0" layoutY="133.0" prefHeight="480.0" prefWidth="1269.0">
         <columns>
             <TableColumn fx:id="customerNumber" prefWidth="107.20000267028809" text="customerNumber" />
             <TableColumn fx:id="customerName" prefWidth="98.0" text="customerName" />
+            <TableColumn fx:id="contactFirstName" prefWidth="130.0" text="contactFirstName" />
             <TableColumn fx:id="contactLastName" prefWidth="104.39999389648438" text="contactLastName" />
             <TableColumn fx:id="phone" prefWidth="61.00001525878906" text="phone" />
             <TableColumn fx:id="addressLine1" prefWidth="80.19998168945312" text="addressLine1" />
@@ -22,9 +23,8 @@
             <TableColumn fx:id="country" prefWidth="59.39996337890625" text="country" />
             <TableColumn fx:id="salesRepEmployeeNumber" prefWidth="160.19989013671875" text="salesRepEmployeeNumber" />
             <TableColumn fx:id="creditLimit" minWidth="0.0" prefWidth="79.5999755859375" text="creditLimit" />
-            <TableColumn fx:id="contactFirstName" prefWidth="130.0" text="contactFirstName" />
         </columns>
     </TableView>
-   <Button layoutX="1250.0" layoutY="35.0" mnemonicParsing="false" text="SALIR" />
+    <Button layoutX="1250.0" layoutY="35.0" mnemonicParsing="false" onAction="#exitAndCloseConecctions" text="SALIR" />
 
 </AnchorPane>

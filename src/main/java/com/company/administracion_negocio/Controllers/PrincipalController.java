@@ -1,5 +1,6 @@
 package com.company.administracion_negocio.Controllers;
 
+import com.company.administracion_negocio.Conection.DataBaseConnection;
 import com.company.administracion_negocio.Model.Customers;
 import com.company.administracion_negocio.Principal;
 import javafx.beans.property.SimpleIntegerProperty;
@@ -18,6 +19,7 @@ import javafx.stage.Stage;
 
 import java.io.IOException;
 import java.net.URL;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.ResourceBundle;
 
@@ -30,6 +32,7 @@ public class PrincipalController {
         Principal principal = new Principal();
         try {
             principal.addProduct(new Stage());
+
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -47,10 +50,25 @@ public class PrincipalController {
         Node source = (Node) actionEvent.getSource();
         Stage stage = (Stage) source.getScene().getWindow();
         stage.close();
+        try {
+            System.out.println("Cerrando conexion");
+            DataBaseConnection.getInstance().closeDB();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
 
+    public void openViewAddCustomer(ActionEvent actionEvent) {
 
-
-
+        Node source = (Node) actionEvent.getSource();
+        Stage stage = (Stage) source.getScene().getWindow();
+        stage.close();
+        Principal principal = new Principal();
+        try {
+            principal.openViewAddCustomer(new Stage());
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
 }

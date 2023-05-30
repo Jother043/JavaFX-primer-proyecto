@@ -1,10 +1,11 @@
 package com.company.administracion_negocio.Conection;
 import java.io.Closeable;
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 
-public class DataBaseConnection implements Closeable {
+public class DataBaseConnection{
 
     private static DataBaseConnection instance;
     private String url = "jdbc:mysql://localhost:3306/classicmodels?serverTimezone=UTC&useSSL=true&characterEncoding=UTF-8";
@@ -28,19 +29,14 @@ public class DataBaseConnection implements Closeable {
         return instance;
     }
 
-    //Método para cerrar la conexión.
-    public void close() {
-        try {
-            if(conexion != null) {
-                conexion.close();
-            }
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
+    public void closeDB() throws SQLException {
+        conexion.close();
     }
 
     //Método para obtener la conexión
     public Connection getConexion() {
         return conexion;
     }
+
+
 }

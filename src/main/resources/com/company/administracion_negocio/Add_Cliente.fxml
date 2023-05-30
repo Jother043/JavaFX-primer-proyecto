@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+
+<AnchorPane fx:id="formContainer" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/17.0.2-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.company.administracion_negocio.Controllers.AddClienteController">
+   <children>
+      <Label layoutX="32.0" layoutY="80.0" text="Nombre cliente" />
+      <Label layoutX="33.0" layoutY="116.0" text="Primer apellido" />
+      <Label layoutX="34.0" layoutY="153.0" text="Segundo apellido" />
+      <Label layoutX="35.0" layoutY="191.0" text="Nº Telefono" />
+      <Label layoutX="37.0" layoutY="228.0" text="Dirección 1" />
+      <Label layoutX="37.0" layoutY="265.0" text="Dirección 2" />
+      <Label layoutX="37.0" layoutY="304.0" text="Ciudad" />
+      <Label layoutX="38.0" layoutY="346.0" text="Estado" />
+      <Label layoutX="347.0" layoutY="80.0" text="Código postal" />
+      <Label layoutX="347.0" layoutY="116.0" text="Pais" />
+      <Label layoutX="349.0" layoutY="191.0" text="Credito" />
+      <Label layoutX="344.0" layoutY="153.0" text="Sales Employer" />
+      <TextField fx:id="idNombreCliente" layoutX="147.0" layoutY="76.0" />
+      <TextField fx:id="idPrimerApellido" cache="true" layoutX="147.0" layoutY="112.0" />
+      <TextField fx:id="idSegundoApellido" layoutX="147.0" layoutY="149.0" />
+      <TextField fx:id="idNumeroTelefono" layoutX="148.0" layoutY="187.0" />
+      <TextField fx:id="idDirection" layoutX="148.0" layoutY="224.0" />
+      <TextField fx:id="idDireccion2" layoutX="148.0" layoutY="261.0" />
+      <TextField fx:id="idCiudad" layoutX="149.0" layoutY="300.0" />
+      <TextField fx:id="idCodigoPostal" layoutX="438.0" layoutY="76.0" />
+      <TextField fx:id="idPais" layoutX="439.0" layoutY="112.0" />
+      <TextField fx:id="idEstado" layoutX="147.0" layoutY="342.0" />
+      <TextField fx:id="idCredito" layoutX="438.0" layoutY="188.0" />
+      <Text layoutX="32.0" layoutY="47.0" strokeType="OUTSIDE" strokeWidth="0.0" text="INSERTAR CLIENTE EN LA BASE DE DATOS" />
+      <Button fx:id="btnAñadirCliente" layoutX="439.0" layoutY="224.0" mnemonicParsing="false" onAction="#insertarCleinte" prefHeight="25.0" prefWidth="149.0" text="Añadir cliente" />
+      <Button fx:id="btnVolver" layoutX="438.0" layoutY="342.0" mnemonicParsing="false" onAction="#returnToMainView" prefHeight="25.0" prefWidth="150.0" text="Volver" />
+      <ChoiceBox fx:id="boxEmpleyes" layoutX="439.0" layoutY="149.0" onTouchPressed="#selectEmployees" prefWidth="150.0" />
+   </children>
+</AnchorPane>

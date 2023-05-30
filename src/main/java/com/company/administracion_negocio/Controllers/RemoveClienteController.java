@@ -11,12 +11,13 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.input.KeyEvent;
 
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.ResourceBundle;
 
-public class ClienteController implements javafx.fxml.Initializable {
+public class RemoveClienteController implements javafx.fxml.Initializable {
 
     @FXML
     public Button BtnUpdate;
@@ -162,5 +163,13 @@ public class ClienteController implements javafx.fxml.Initializable {
 
         //Cerrar ventana
         ((Node)(actionEvent.getSource())).getScene().getWindow().hide();
+    }
+
+    public void onPressIntro(KeyEvent keyEvent) {
+        // Verificar si se presiona la tecla ENTER.
+        if(keyEvent.getCode().toString().equals("ENTER")){
+            // Eliminar cliente.
+            RemoveClienteTabla();
+        }
     }
 }
